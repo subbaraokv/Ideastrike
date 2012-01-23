@@ -1,61 +1,116 @@
-﻿@using Nancy
+﻿@using Nancy;
+@using Ideastrike.Nancy.Helpers;
 <!doctype html>
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if gt IE 8]>
+<html class="no-js" lang="en">
+<![endif]-->
 <head>
-  <meta charset="utf-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <script type="text/javascript">
+        (function () {
+            if (typeof window.janrain !== 'object') window.janrain = {};
+            window.janrain.settings = {};
 
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            janrain.settings.tokenUrl = '@(string.Format(@"{0}", UrlExtensions.ToPublicUrl(HttpContext.Current, new Uri("login/token", UriKind.Relative))))';
 
-  <title>@Model.Title</title>
-  <meta name="viewport" content="width=device-width" />
+            function isReady() { janrain.ready = true; };
+            if (document.addEventListener) {
+                document.addEventListener("DOMContentLoaded", isReady, false);
+            } else {
+                window.attachEvent('onload', isReady);
+            }
 
-  @* TODO: Minimize, I usually use Squishit *@
-  <link href="@Url.Content("~/Resources/bootstrap.min.css")" rel="stylesheet" />
-  <link href="@Url.Content("~/Resources/media.css")" rel="stylesheet" />
-  <link href="@Url.Content("~/Resources/style.css")" rel="stylesheet" />
+            var e = document.createElement('script');
+            e.type = 'text/javascript';
+            e.id = 'janrainAuthWidget';
 
-  @RenderSection("HeadContent", false)
- 
-  <script src="@Url.Content("~/Resources/modernizr-2.0.min.js")"></script>
-  <script src="@Url.Content("~/Resources/respond.min.js")"></script>
+            if (document.location.protocol === 'https:') {
+                e.src = 'https://rpxnow.com/js/lib/code52/engage.js';
+            } else {
+                e.src = 'http://widget-cdn.rpxnow.com/js/lib/code52/engage.js';
+            }
+
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(e, s);
+        })();
+    </script>
+    <title>@Model.Title</title>
+    <meta name="viewport" content="width=device-width" />
+    @* TODO: Minimize, I usually use Squishit *@
+    <link href="@Url.Content("~/Resources/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Resources/media.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Resources/style.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Resources/ideastrike.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Resources/jquery.fancybox.css")" rel="stylesheet" />
+    @RenderSection("HeadContent", false)
+    <script src="@Url.Content("~/Resources/modernizr-2.0.min.js")"></script>
+    <script src="@Url.Content("~/Resources/respond.min.js")"></script>
 </head>
 <body>
-    <div class="topbar">
-      <div class="fill">
-        <div class="container">
-          <a class="brand" href="/"></a>
-          <ul class="nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/">New Idea</a></li>
-            <li><a href="/">Ideas</a></li>
-          </ul>
-          <form action="/login" class="pull-right">
-            <input class="input-small" type="text" placeholder="Username">
-            <input class="input-small" type="password" placeholder="Password">
-            <button class="btn" type="submit">Sign in</button>
-          </form>
+    <div class="topbar" data-dropdown="dropdown">
+        <div class="fill">
+            <div class="container">
+                <a class="brand" href="/"></a>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/idea/new">New Idea</a></li>
+                    <li><a href="/inbox">Inbox</a></li>
+                </ul>
+                <div class="pull-right loggedin">
+                @if(Model.IsLoggedIn)
+                {
+                    <ul class="nav secondary-nav">
+                        <li class="dropdown">
+                          <a href="#" class="dropdown-toggle" style="min-width:160px;">@*<img src="@@Model.GravatarUrl" />*@ @Model.UserName </a>
+                          <ul class="dropdown-menu">
+                            <li><a href="/profile/edit">Profile</a></li>
+                            <li><a href="/logout">Log out</a></li>
+                          </ul>
+                        </li>
+                    </ul>
+                }
+                else
+                { 
+                    <ul class="nav secondary-nav"><li><a class="janrainEngage" href="#">Sign In</a></li></ul>
+                }
+                </div>
+            </div>
+            <a id="github-banner" href="https://github.com/code52/ideastrike">
+                <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67"
+                    alt="Fork me on GitHub">
+            </a>
         </div>
-      </div>
     </div>
-    
     <div class="container">
         <div class="content">
             @RenderBody()
         </div>
-
         <footer>
             <p><a href="https://github.com/code52/ideastrike">Powered by Ideastrike</a></p>
-	    <p><a href="/admin/">Admin Panel</a></p>
+            <p><a href="/admin/">Admin Panel</a></p>
         </footer>
-
-    </div> <!-- /container -->
-
+    </div>
+    <!-- /container -->
     <!-- Script at the bottom for fast page loading -->
-    <script src="@Url.Content("~/Resources/jquery-1.7.min.js")"></script>
-
+    <script type="text/javascript" src="@Url.Content("~/Resources/jquery-1.7.min.js")"></script>
+    <script src="@Url.Content("~/Resources/jquery.validate.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/showdown.js")"> </script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/ideastrike.js")"> </script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/bootstrap-alerts.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/bootstrap-dropdown.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/social.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Resources/jquery.fancybox.pack.js")"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".close").click(function () {
+                $(".alert-message").hide();
+            });
+        });
+    </script>
     @RenderSection("PageScript", false)
 </body>
-</html>
+</html> 

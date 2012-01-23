@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Nancy;
+﻿using Nancy;
 using Xunit;
-using Moq;
-using Ideastrike.Nancy.Models;
-
 
 namespace IdeaStrike.Tests.IdeaModuleTests
 {
     public class when_viewing_the_idea_page : IdeaStrikeSpecBase
     {
-
         public when_viewing_the_idea_page()
         {
             var testRequest = GetTestRequest("/idea/0/");

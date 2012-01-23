@@ -1,26 +1,34 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Autofac;
-using Ideastrike.Nancy;
+using System;
+using Nancy.Testing;
+using Nancy.Bootstrapper;
+using Ideastrike;
 using Ideastrike.Nancy.Models;
-using Ideastrike.Nancy.Models.Repositories;
-using Nancy;
-using Moq;
 
 namespace IdeaStrike.Tests
 {
-    public class IdeaStrikeTestBootStrapper : IdeastrikeBootstrapper
+    public class IdeaStrikeTestBootStrapper : ConfigurableBootstrapper
     {
-        private readonly ContainerBuilder builder;
-        public IdeaStrikeTestBootStrapper(ContainerBuilder builder)
+        private readonly IDictionary<Type, object> _mocks;
+        
+        public IdeaStrikeTestBootStrapper(IDictionary<Type,object> mocks)
         {
-            this.builder = builder;
+            _mocks = mocks;
         }
 
-        protected override void ConfigureApplicationContainer(ILifetimeScope existingContainer)
+        protected override void ApplicationStartup(TinyIoC.TinyIoCContainer container, IPipelines pipelines) {
+            FormsAuthentication.Enable(pipelines, new FormsAuthenticationConfiguration {
+                RedirectUrl = "~/login",
+                UserMapper = _mocks[typeof(IUserRepository)] as IUserRepository
+            });
+        }
+
+        protected override void ConfigureRequestContainer(TinyIoC.TinyIoCContainer container)
         {
-            builder.Update(existingContainer.ComponentRegistry);
+            foreach (var mock in _mocks)
+            {
+                container.Register(mock.Key, mock.Value);
+            }
         }
     }
 }

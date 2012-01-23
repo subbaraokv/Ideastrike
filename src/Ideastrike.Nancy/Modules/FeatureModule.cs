@@ -2,6 +2,8 @@
 using System.Linq;
 using Ideastrike.Nancy.Models;
 using Nancy;
+using Ideastrike.Nancy.Models.Repositories;
+using Nancy.Security;
 
 namespace Ideastrike.Nancy.Modules
 {
@@ -10,11 +12,13 @@ namespace Ideastrike.Nancy.Modules
         private readonly IIdeaRepository _ideas;
         private readonly IFeatureRepository _features;
 
-        public FeatureModule(IIdeaRepository ideas, IFeatureRepository features)
+        public FeatureModule(IIdeaRepository ideas, IFeatureRepository features, IUserRepository users)
             : base("/idea")
         {
             _ideas = ideas;
             _features = features;
+
+            this.RequiresAuthentication();
 
             Post["/{idea}/feature"] = _ =>
             {
@@ -22,7 +26,8 @@ namespace Ideastrike.Nancy.Modules
                 var feature = new Feature
                                 {
                                     Time = DateTime.UtcNow,
-                                    Text = Request.Form.feature
+                                    Text = Request.Form.feature,
+                                    User = Context.GetCurrentUser(users)
                                 };
                 _features.Add(id, feature);
 
